@@ -2,6 +2,7 @@ package co.uk.darioghunneyware.citibank.model
 
 import co.uk.darioghunneyware.citibank.model.enumeration.StockType
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 class Preferred(
     override val identifier: String,
@@ -11,17 +12,18 @@ class Preferred(
     val fixedDividend: BigDecimal,
 ) : Stock(identifier, lastDividend, parValue, type) {
     companion object {
-        private const val TWO: Int = 2
+        private const val SCALE: Int = 2
     }
 
-    override fun calculateDividendYield(price: BigDecimal): BigDecimal = (fixedDividend.movePointLeft(TWO) * parValue / price)
+    override fun calculateDividendYield(price: BigDecimal): BigDecimal =
+        (fixedDividend.movePointLeft(SCALE) * parValue / price).setScale(SCALE, RoundingMode.HALF_UP)
 
     override fun toString(): String =
         """
         Stock Identifier: $identifier
         Type: $type
-        Last Dividend: $lastDividend
-        Fixed Dividend: $fixedDividend%
-        Par Value: $parValue
+        Last Dividend: ${lastDividend.setScale(SCALE, RoundingMode.HALF_UP)}
+        Fixed Dividend: ${fixedDividend.setScale(SCALE, RoundingMode.HALF_UP)}%
+        Par Value: ${parValue.setScale(SCALE, RoundingMode.HALF_UP)}
         """.trimIndent()
 }

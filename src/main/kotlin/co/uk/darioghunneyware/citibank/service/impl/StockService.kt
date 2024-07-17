@@ -128,6 +128,7 @@ class StockService(
         return recentTrades
             .sumOf { it.tradedPrice.times(BigDecimal(it.quantity)) }
             .div(BigDecimal(recentTrades.size))
+            .setScale(SCALE, RoundingMode.HALF_UP)
     }
 
     @ShellMethod(key = ["calculate-all-share-index"], value = "Calculate the all Share Index for all Stocks")

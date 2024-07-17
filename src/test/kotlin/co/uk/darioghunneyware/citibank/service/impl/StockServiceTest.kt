@@ -26,40 +26,40 @@ class StockServiceTest {
         val tea =
             Ordinary(
                 identifier = "TEA",
-                lastDividend = BigDecimal.ZERO,
-                parValue = BigDecimal(150),
+                lastDividend = BigDecimal(100.46),
+                parValue = BigDecimal(150.33),
             )
         val coffee =
             Preferred(
                 identifier = "COF",
-                lastDividend = BigDecimal(8),
-                fixedDividend = BigDecimal(4),
-                parValue = BigDecimal(100),
+                lastDividend = BigDecimal(8.39),
+                fixedDividend = BigDecimal(4.39),
+                parValue = BigDecimal(100.39),
             )
         val milk =
             Ordinary(
                 identifier = "MIL",
-                lastDividend = BigDecimal(8),
-                parValue = BigDecimal.valueOf(100),
+                lastDividend = BigDecimal(8.39),
+                parValue = BigDecimal.valueOf(100.82),
             )
         val juice =
             Ordinary(
                 identifier = "JUI",
-                lastDividend = BigDecimal(23),
-                parValue = BigDecimal.valueOf(70),
+                lastDividend = BigDecimal(23.64),
+                parValue = BigDecimal.valueOf(70.39),
             )
         val water =
             Ordinary(
                 identifier = "WAT",
-                lastDividend = BigDecimal(13),
-                parValue = BigDecimal.valueOf(250),
+                lastDividend = BigDecimal(13.39),
+                parValue = BigDecimal.valueOf(250.23),
             )
 
         @JvmStatic
         fun dividendYieldParams(): Stream<Arguments> =
             Stream.of(
-                Arguments.of("TEA", BigDecimal(75), BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP)),
-                Arguments.of("COF", BigDecimal(47), BigDecimal(0.09).setScale(2, RoundingMode.HALF_UP)),
+                Arguments.of("TEA", BigDecimal(75.8), BigDecimal(1.33).setScale(2, RoundingMode.HALF_UP)),
+                Arguments.of("COF", BigDecimal(47.3), BigDecimal(0.09).setScale(2, RoundingMode.HALF_UP)),
             )
     }
 
@@ -123,8 +123,8 @@ class StockServiceTest {
         val water =
             Ordinary(
                 identifier = "WAT",
-                lastDividend = BigDecimal(13),
-                parValue = BigDecimal.valueOf(250),
+                lastDividend = BigDecimal(13.39),
+                parValue = BigDecimal.valueOf(250.23),
             )
 
         stockService.add(
@@ -148,31 +148,15 @@ class StockServiceTest {
     fun `Display all Stocks`() {
         val expected =
             """
-            Stock Identifier: TEA
-            Type: ORDINARY
-            Last Dividend: 0
-            Par Value: 150
-            
-            Stock Identifier: COF
-            Type: PREFERRED
-            Last Dividend: 8
-            Fixed Dividend: 4%
-            Par Value: 100
-            
-            Stock Identifier: MIL
-            Type: ORDINARY
-            Last Dividend: 8
-            Par Value: 100
-            
-            Stock Identifier: JUI
-            Type: ORDINARY
-            Last Dividend: 23
-            Par Value: 70
-            
-            Stock Identifier: WAT
-            Type: ORDINARY
-            Last Dividend: 13
-            Par Value: 250
+$tea
+
+$coffee
+
+$milk
+
+$juice
+
+$water
             """.trimIndent()
         assertThat(stockService.displayStocks()).isEqualTo(expected)
     }
@@ -198,7 +182,7 @@ class StockServiceTest {
 
     @Test
     fun `Calculate price to earnings ratio`() {
-        assertThat(stockService.calculatePriceToEarningsRatio("JUI", BigDecimal(146))).isEqualTo(BigDecimal(6))
+        assertThat(stockService.calculatePriceToEarningsRatio("JUI", BigDecimal(146))).isEqualTo(BigDecimal(6.00).setScale(2))
     }
 
     @Test
@@ -219,8 +203,8 @@ class StockServiceTest {
         val water =
             Ordinary(
                 identifier = id,
-                lastDividend = BigDecimal(13),
-                parValue = BigDecimal.valueOf(250),
+                lastDividend = BigDecimal(13.39),
+                parValue = BigDecimal.valueOf(250.23),
             )
         val trade = Trade(water, LocalDateTime.now(), quantity, buy, tradedPrice)
         stockService.captureTrade(id, buy, quantity, tradedPrice)
@@ -244,7 +228,7 @@ class StockServiceTest {
     @Test
     fun `Calculate volume weighted stock price`() {
         loadTrades()
-        assertThat(stockService.calculateVolumeWeightedStockPrice()).isEqualTo(BigDecimal(850))
+        assertThat(stockService.calculateVolumeWeightedStockPrice()).isEqualTo(BigDecimal(850.00).setScale(2))
     }
 
     @Test

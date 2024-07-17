@@ -22,19 +22,20 @@ Enter `java -jar simple-stock-market.jar` to run the application.
 #### Examples
 **add**
 ```shell
-add CAR ORDINARY 100 10 0
+add CAR ORDINARY 34.55 10
+add TAT PREFERRED 22.78 120 8.9
 ```
 **calculate-dividend-yield**
 ```shell
-calculate-dividend-yield CAR 10
+calculate-dividend-yield CAR 10.50
 ```
 **calculate-pe-ratio**
 ```shell
-calculate-pe-ratio CAR 15
+calculate-pe-ratio CAR 15,77
 ```
 **capture-trade**
 ```shell
-capture-trade CAR BUY 50 19
+capture-trade CAR BUY 50 19.22
 ```
 **calculate-vwap**
 ```shell
@@ -52,3 +53,6 @@ display-stocks
 ```shell
 display-trades
 ```
+
+## Testing
+To run the tests, enter `./gradlew clean test`.
