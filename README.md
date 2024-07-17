@@ -1,5 +1,11 @@
 # Simple Stock Market
 
+### Table of Contents
+1. [Running the application](#running-the-application)
+2. [Commands](#commands)
+3. [Examples](#examples)
+4. [Testing](#testing)
+
 ## Running the application
 ### IntelliJ
 Simply right click on `SimpleStockMarketApplication.kt` and select run `Run 'SimpleStockMarketApplication.kt'`.
@@ -19,7 +25,7 @@ Enter `java -jar simple-stock-market.jar` to run the application.
 * **display-trades**: Displays all Trades, grouped by Stock
 * **remove**: Remove a Stock
 
-#### Examples
+### Examples
 **add**
 ```shell
 add CAR ORDINARY 34.55 10
