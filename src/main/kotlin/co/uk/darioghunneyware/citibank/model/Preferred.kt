@@ -1,6 +1,7 @@
 package co.uk.darioghunneyware.citibank.model
 
 import co.uk.darioghunneyware.citibank.model.enumeration.StockType
+import co.uk.darioghunneyware.citibank.util.Constants.Companion.SCALE
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -11,10 +12,6 @@ class Preferred(
     override val type: StockType = StockType.PREFERRED,
     val fixedDividend: BigDecimal,
 ) : Stock(identifier, lastDividend, parValue, type) {
-    companion object {
-        private const val SCALE: Int = 2
-    }
-
     override fun calculateDividendYield(price: BigDecimal): BigDecimal =
         (fixedDividend.movePointLeft(SCALE) * parValue / price).setScale(SCALE, RoundingMode.HALF_UP)
 

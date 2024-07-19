@@ -1,6 +1,7 @@
 package co.uk.darioghunneyware.citibank.model
 
 import co.uk.darioghunneyware.citibank.model.enumeration.Indicator
+import co.uk.darioghunneyware.citibank.util.Constants.Companion.SCALE
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDateTime
@@ -12,10 +13,6 @@ data class Trade(
     val indicator: Indicator,
     val tradedPrice: BigDecimal,
 ) {
-    companion object {
-        private const val SCALE = 2
-    }
-
     override fun toString(): String =
         """
         

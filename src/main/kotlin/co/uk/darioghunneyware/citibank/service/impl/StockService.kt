@@ -8,7 +8,10 @@ import co.uk.darioghunneyware.citibank.model.Stock
 import co.uk.darioghunneyware.citibank.model.Trade
 import co.uk.darioghunneyware.citibank.model.enumeration.Indicator
 import co.uk.darioghunneyware.citibank.model.enumeration.StockType
+import co.uk.darioghunneyware.citibank.model.factory.IStockFactory
+import co.uk.darioghunneyware.citibank.model.factory.impl.StockFactory
 import co.uk.darioghunneyware.citibank.service.IStockService
+import co.uk.darioghunneyware.citibank.util.Constants.Companion.SCALE
 import org.springframework.shell.standard.ShellComponent
 import org.springframework.shell.standard.ShellMethod
 import org.springframework.stereotype.Service
@@ -20,11 +23,11 @@ import kotlin.math.pow
 @Service
 @ShellComponent
 class StockService(
+    private val stockFactory: IStockFactory,
     private val stocks: MutableList<Stock>,
     private val trades: MutableMap<String, MutableList<Trade>>,
 ) : IStockService {
     companion object {
-        private const val SCALE = 2
         private const val ONE: Double = 1.0
     }
 
@@ -36,28 +39,7 @@ class StockService(
         parValue: BigDecimal,
         fixedDividend: BigDecimal?,
     ) {
-        val stock =
-            when (type) {
-                StockType.ORDINARY ->
-                    Ordinary(
-                        identifier = stockIdentifier,
-                        lastDividend = lastDividend,
-                        parValue = parValue,
-                    )
-
-                StockType.PREFERRED -> {
-                    if (fixedDividend == null) {
-                        throw IllegalArgumentException("Fixed Dividend is required for Preferred Shares.")
-                    }
-
-                    Preferred(
-                        identifier = stockIdentifier,
-                        lastDividend = lastDividend,
-                        fixedDividend = fixedDividend,
-                        parValue = parValue,
-                    )
-                }
-            }
+        val stock = stockFactory.createStock(stockIdentifier, type, lastDividend, parValue, fixedDividend)
 
         stocks.add(stock)
     }
@@ -108,7 +90,10 @@ class StockService(
         }
     }
 
-    @ShellMethod(key = ["calculate-vwap"], value = "Calculate the Volume Weighted Stock Price based on trades in past 15 minutes")
+    @ShellMethod(
+        key = ["calculate-vwap"],
+        value = "Calculate the Volume Weighted Stock Price based on trades in past 15 minutes"
+    )
     override fun calculateVolumeWeightedStockPrice(): BigDecimal {
         if (trades.isEmpty()) {
             throw TradeException("No trades have been executed yet.")
@@ -121,7 +106,7 @@ class StockService(
             trades.values.flatMap { tradeList ->
                 tradeList.filter {
                     it.timestamp.isBefore(now) &&
-                        it.timestamp.isAfter(lastFifteenMinutes)
+                            it.timestamp.isAfter(lastFifteenMinutes)
                 }
             }
 
@@ -138,7 +123,8 @@ class StockService(
                 trades.values
                     .map { tradeList ->
                         tradeList.map { it.tradedPrice }
-                    }.flatten()
+                    }
+                    .flatten()
                     .reduce { acc, trade -> acc.times(trade) }
 
             return product
