@@ -9,6 +9,9 @@ import co.uk.darioghunneyware.citibank.model.Trade
 import co.uk.darioghunneyware.citibank.model.enumeration.Indicator
 import co.uk.darioghunneyware.citibank.model.enumeration.StockType
 import co.uk.darioghunneyware.citibank.service.IStockService
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.springframework.shell.standard.ShellComponent
 import org.springframework.shell.standard.ShellMethod
 import org.springframework.stereotype.Service
@@ -20,7 +23,7 @@ import kotlin.math.pow
 @Service
 @ShellComponent
 class StockService(
-    private val stocks: MutableList<Stock>,
+    private val stocks: MutableSet<Stock>,
     private val trades: MutableMap<String, MutableList<Trade>>,
 ) : IStockService {
     companion object {
@@ -109,46 +112,60 @@ class StockService(
     }
 
     @ShellMethod(key = ["calculate-vwap"], value = "Calculate the Volume Weighted Stock Price based on trades in past 15 minutes")
-    override fun calculateVolumeWeightedStockPrice(): BigDecimal {
+    override suspend fun calculateVolumeWeightedStockPrice(): BigDecimal {
         if (trades.isEmpty()) {
             throw TradeException("No trades have been executed yet.")
         }
 
-        val now = LocalDateTime.now()
-        val lastFifteenMinutes = now.minusMinutes(15)
+        val vwap =
+            coroutineScope {
+                async(CoroutineName("VWAP Coroutine")) {
+                    val now = LocalDateTime.now()
+                    val lastFifteenMinutes = now.minusMinutes(15)
 
-        val recentTrades =
-            trades.values.flatMap { tradeList ->
-                tradeList.filter {
-                    it.timestamp.isBefore(now) &&
-                        it.timestamp.isAfter(lastFifteenMinutes)
+                    val recentTrades =
+                        trades.values.flatMap { tradeList ->
+                            tradeList.filter {
+                                it.timestamp.isBefore(now) &&
+                                    it.timestamp.isAfter(lastFifteenMinutes)
+                            }
+                        }
+
+                    recentTrades
+                        .sumOf { it.tradedPrice.times(BigDecimal(it.quantity)) }
+                        .div(BigDecimal(recentTrades.size))
+                        .setScale(SCALE, RoundingMode.HALF_UP)
                 }
             }
 
-        return recentTrades
-            .sumOf { it.tradedPrice.times(BigDecimal(it.quantity)) }
-            .div(BigDecimal(recentTrades.size))
-            .setScale(SCALE, RoundingMode.HALF_UP)
+        return vwap.await()
     }
 
     @ShellMethod(key = ["calculate-all-share-index"], value = "Calculate the all Share Index for all Stocks")
-    override fun calculateShareIndex(): BigDecimal {
-        try {
-            val product =
-                trades.values
-                    .map { tradeList ->
-                        tradeList.map { it.tradedPrice }
-                    }.flatten()
-                    .reduce { acc, trade -> acc.times(trade) }
+    override suspend fun calculateShareIndex(): BigDecimal {
+        val allShareIndex =
+            coroutineScope {
+                async(CoroutineName("All Share Index Coroutine")) {
+                    try {
+                        val product =
+                            trades.values
+                                .map { tradeList ->
+                                    tradeList.map { it.tradedPrice }
+                                }.flatten()
+                                .reduce { acc, trade -> acc.times(trade) }
 
-            return product
-                .toDouble()
-                .pow(ONE.div(trades.size))
-                .toBigDecimal()
-                .setScale(SCALE, RoundingMode.HALF_UP)
-        } catch (uoe: UnsupportedOperationException) {
-            throw TradeException("No trades have been executed yet.")
-        }
+                        product
+                            .toDouble()
+                            .pow(ONE.div(trades.size))
+                            .toBigDecimal()
+                            .setScale(SCALE, RoundingMode.HALF_UP)
+                    } catch (uoe: UnsupportedOperationException) {
+                        throw TradeException("No trades have been executed yet.")
+                    }
+                }
+            }
+
+        return allShareIndex.await()
     }
 
     @ShellMethod(key = ["display-stocks"], value = "Displays all Stocks")

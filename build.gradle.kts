@@ -24,12 +24,14 @@ dependencies {
     // Kotlin
     implementation(kotlin("reflect"))
     implementation(kotlin("stdlib"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
 
     // Spring
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.shell:spring-shell-starter")
 
     testImplementation(kotlin("test"))
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.shell:spring-shell-test")
     testImplementation("org.springframework.shell:spring-shell-test-autoconfigure")

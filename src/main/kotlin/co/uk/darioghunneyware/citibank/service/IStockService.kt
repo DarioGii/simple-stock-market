@@ -36,7 +36,7 @@ interface IStockService {
         tradedPrice: BigDecimal,
     )
 
-    fun calculateVolumeWeightedStockPrice(): BigDecimal
+    suspend fun calculateVolumeWeightedStockPrice(): BigDecimal
 
-    fun calculateShareIndex(): BigDecimal
+    suspend fun calculateShareIndex(): BigDecimal
 }
